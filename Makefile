@@ -4,4 +4,5 @@ run:
 build-bin:
 	mkdir -p target
 	# -ldflags="-w -s"
-	go build -o target/tcp-proxy cmd/tcp-proxy/main.go
+	GOOS=linux GOARCH=amd64 go build -o target/tcp-proxy cmd/tcp-proxy/main.go
+	GOOS=windows GOARCH=amd64 go build -o target/tcp-proxy.exe cmd/tcp-proxy/main.go
