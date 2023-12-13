@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/mgutz/ansi"
@@ -47,7 +48,7 @@ func (l ColorLogger) Trace(f string, args ...any) {
 	if !l.VeryVerbose {
 		return
 	}
-	l.output("blue", f, args...)
+	l.output("blue", "TRACE", f, args...)
 }
 
 // Debug - Log a debug message
@@ -55,29 +56,32 @@ func (l ColorLogger) Debug(f string, args ...any) {
 	if !l.Verbose {
 		return
 	}
-	l.output("white", f, args...)
+	l.output("white", "DEBUG", f, args...)
 }
 
 // Info - Log a general message
 func (l ColorLogger) Info(f string, args ...any) {
-	l.output("green", f, args...)
+	l.output("green", "INFO", f, args...)
 }
 
 // Warn - Log a warning
 func (l ColorLogger) Warn(f string, args ...any) {
-	l.output("yellow", f, args...)
+	l.output("yellow", "WARN", f, args...)
 }
 
 // Warn - Log a warning
 func (l ColorLogger) Error(f string, args ...any) {
-	l.output("red", f, args...)
+	l.output("red", "ERROR", f, args...)
 }
 
-func (l ColorLogger) output(color, f string, args ...any) {
+func (l ColorLogger) output(color, tag, f string, args ...any) {
 	if l.Color && color != "" {
 		f = ansi.Color(f, color)
 	}
 
-	f = fmt.Sprintf("[%s] %s%s\n", time.Now().Format("2006-01-02T15:04:05.000Z07:00"), l.Prefix, f)
+	f = fmt.Sprintf(
+		"[%s %s] %s%s\n", time.Now().Format("2006-01-02T15:04:05.000Z07:00"),
+		tag, l.Prefix, strings.TrimSpace(f),
+	)
 	fmt.Printf(f, args...)
 }
