@@ -35,8 +35,8 @@ func main() {
 
 	config = NewConfig()
 
-	flag.StringVar(&localAddr, "localAddr", ":8080", "local address")
-	flag.StringVar(&remoteAddr, "remoteAddr", "localhost:8000", "remote address")
+	flag.StringVar(&localAddr, "localAddr", ":8080,8081,8082-8089", `local address`)
+	flag.StringVar(&remoteAddr, "remoteAddr", "localhost:8000,8001,8002-8009", `remote address`)
 
 	flag.StringVar(&config.Match, "match", "", "match regex (in the form 'regex')")
 	flag.StringVar(&config.Replace, "replace", "", "replace regex (in the form 'regex~replacer')")
@@ -103,12 +103,13 @@ func main() {
 	select {
 	case sig := <-quit: // sig := <-quit:
 		// if sig == syscall.SIGUSR2 {...}
-		fmt.Println("... received:", sig)
+		fmt.Fprintln(os.Stderr, "... received:", sig)
 		close(config.ExitChan)
 	}
 
-	_Logger.Warn("Close listeners...")
-	time.Sleep(3 * time.Second)
+	dur := 3 * time.Second
+	_Logger.Warn("Close listeners in %s...", dur)
+	time.Sleep(dur)
 	for _, listener = range listeners {
 		_ = listener.Close()
 	}
@@ -191,8 +192,7 @@ func run(localAddr string, remoteAddr string, config *Config) (
 	}
 
 	go func() {
-		ok := <-config.RunChan
-		if !ok {
+		if ok := <-config.RunChan; !ok {
 			return
 		}
 
