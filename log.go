@@ -9,26 +9,26 @@ import (
 
 // Logger - Interface to pass into Proxy for it to log messages
 type Logger interface {
-	Trace(f string, args ...interface{})
-	Debug(f string, args ...interface{})
-	Info(f string, args ...interface{})
-	Warn(f string, args ...interface{})
+	Trace(f string, args ...any)
+	Debug(f string, args ...any)
+	Info(f string, args ...any)
+	Warn(f string, args ...any)
 }
 
 // NullLogger - An empty logger that ignores everything
 type NullLogger struct{}
 
 // Trace - no-op
-func (l NullLogger) Trace(f string, args ...interface{}) {}
+func (l NullLogger) Trace(f string, args ...any) {}
 
 // Debug - no-op
-func (l NullLogger) Debug(f string, args ...interface{}) {}
+func (l NullLogger) Debug(f string, args ...any) {}
 
 // Info - no-op
-func (l NullLogger) Info(f string, args ...interface{}) {}
+func (l NullLogger) Info(f string, args ...any) {}
 
 // Warn - no-op
-func (l NullLogger) Warn(f string, args ...interface{}) {}
+func (l NullLogger) Warn(f string, args ...any) {}
 
 // ColorLogger - A Logger that logs to stdout in color
 type ColorLogger struct {
@@ -39,7 +39,7 @@ type ColorLogger struct {
 }
 
 // Trace - Log a very verbose trace message
-func (l ColorLogger) Trace(f string, args ...interface{}) {
+func (l ColorLogger) Trace(f string, args ...any) {
 	if !l.VeryVerbose {
 		return
 	}
@@ -47,7 +47,7 @@ func (l ColorLogger) Trace(f string, args ...interface{}) {
 }
 
 // Debug - Log a debug message
-func (l ColorLogger) Debug(f string, args ...interface{}) {
+func (l ColorLogger) Debug(f string, args ...any) {
 	if !l.Verbose {
 		return
 	}
@@ -55,16 +55,16 @@ func (l ColorLogger) Debug(f string, args ...interface{}) {
 }
 
 // Info - Log a general message
-func (l ColorLogger) Info(f string, args ...interface{}) {
+func (l ColorLogger) Info(f string, args ...any) {
 	l.output("green", f, args...)
 }
 
 // Warn - Log a warning
-func (l ColorLogger) Warn(f string, args ...interface{}) {
+func (l ColorLogger) Warn(f string, args ...any) {
 	l.output("red", f, args...)
 }
 
-func (l ColorLogger) output(color, f string, args ...interface{}) {
+func (l ColorLogger) output(color, f string, args ...any) {
 	if l.Color && color != "" {
 		f = ansi.Color(f, color)
 	}
