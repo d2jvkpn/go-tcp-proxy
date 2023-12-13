@@ -127,20 +127,17 @@ func parseAddr(str *string) (ports []uint64, err error) {
 		return nil, fmt.Errorf("missing ports: %q", *str)
 	}
 
-	return parsePortRange(portStr)
+	return ParsePorts(portStr)
 }
 
-func parsePortRange(str string) (ports []uint64, err error) {
+// parse ports from string: 8000,8001,8002-8009
+func ParsePorts(str string) (ports []uint64, err error) {
 	var (
 		p1, p2 uint64
 		strs   []string
 	)
 
 	strs = strings.Split(str, ",")
-	if len(strs) == 0 {
-		return nil, fmt.Errorf("invalid ports: %s", str)
-	}
-
 	ports = make([]uint64, 0, len(strs))
 
 	for _, v := range strs {
@@ -148,16 +145,21 @@ func parsePortRange(str string) (ports []uint64, err error) {
 		if len(list) == 0 {
 			continue
 		}
-		if len(list) == 1 {
-			list = append(list, list[0])
-		}
 
 		if p1, err = strconv.ParseUint(strings.TrimSpace(list[0]), 10, 64); err != nil {
 			return nil, err
 		}
 
-		if p2, err = strconv.ParseUint(strings.TrimSpace(list[1]), 10, 64); err != nil {
-			return nil, err
+		if len(list) == 1 {
+			p2 = p1
+		} else {
+			if p2, err = strconv.ParseUint(strings.TrimSpace(list[1]), 10, 64); err != nil {
+				return nil, err
+			}
+		}
+
+		if p1 > p2 {
+			p1, p2 = p2, p1
 		}
 
 		for p := p1; p <= p2; p++ {
