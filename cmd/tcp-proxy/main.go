@@ -33,8 +33,8 @@ func main() {
 
 	config = NewConfig()
 
-	flag.StringVar(&localAddr, "localAddr", ":8080,8081,8082-8089", `local address`)
-	flag.StringVar(&remoteAddr, "remoteAddr", "localhost:8000,8001,8002-8009", `remote address`)
+	flag.StringVar(&localAddr, "local", ":8080,8081,8082-8089", `local address`)
+	flag.StringVar(&remoteAddr, "remote", "localhost:8000,8001,8002-8009", `remote address`)
 
 	flag.StringVar(&config.Match, "match", "", "match regex (in the form 'regex')")
 	flag.StringVar(&config.Replace, "replace", "", "replace regex (in the form 'regex~replacer')")

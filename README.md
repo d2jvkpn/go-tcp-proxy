@@ -23,11 +23,11 @@ $ go get -v github.com/jpillora/go-tcp-proxy/cmd/tcp-proxy
 ```
 $ tcp-proxy --help
 Usage of tcp-proxy:
-  -c: output ansi colors
-  -h: output hex
-  -l="localhost:9999": local address
-  -n: disable nagles algorithm
-  -r="localhost:80": remote address
+  -color: output ansi colors
+  -hex: output hex
+  -local="localhost:9999": local address
+  -nagles: disable nagles algorithm
+  -remote="localhost:80": remote address
   -match="": match regex (in the form 'regex')
   -replace="": replace regex (in the form 'regex~replacer')
   -v: display server actions
