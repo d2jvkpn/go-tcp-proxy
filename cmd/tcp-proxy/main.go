@@ -99,15 +99,17 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGUSR2)
 
 	select {
-	case sig := <-quit: // sig := <-quit:
-		// if sig == syscall.SIGUSR2 {...}
+	case sig := <-quit:
+		// if sig == syscall.SIGUSR2 {/* */}
 		fmt.Fprintln(os.Stderr, "... received:", sig)
-		close(config.ExitChan)
 	}
+
+	close(config.ExitChan)
 
 	dur := 3 * time.Second
 	logger.Warn("Close listeners in %s...", dur)
 	time.Sleep(dur)
+
 	for _, listener = range listeners {
 		_ = listener.Close()
 	}
@@ -163,6 +165,7 @@ func run(localAddr string, remoteAddr string, config *Config, logger proxy.Logge
 				return
 			default:
 			}
+
 			var (
 				p    *proxy.Proxy
 				conn *net.TCPConn
