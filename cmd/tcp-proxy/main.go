@@ -57,17 +57,17 @@ func main() {
 	}
 
 	if localPorts, err = parseAddr(&localAddr); err != nil {
-		logger.Warn(err.Error())
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
 	if remotePorts, err = parseAddr(&remoteAddr); err != nil {
-		logger.Warn(err.Error())
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
 	if len(localPorts) != len(remotePorts) {
-		logger.Warn("The number of localPorts and remotePorts is not equal")
+		logger.Error("The number of localPorts and remotePorts is not equal")
 		os.Exit(1)
 	}
 
@@ -78,7 +78,7 @@ func main() {
 		raddr := fmt.Sprintf("%s:%d", remoteAddr, remotePorts[i])
 
 		if listener, err = run(laddr, raddr, config, logger); err != nil {
-			logger.Warn(err.Error())
+			logger.Error(err.Error())
 			for _, listener = range listeners {
 				_ = listener.Close()
 				config.RunChan <- false
@@ -170,7 +170,7 @@ func run(localAddr string, remoteAddr string, config *Config, logger proxy.Logge
 			)
 
 			if conn, err = listener.AcceptTCP(); err != nil {
-				logger.Warn("Failed to accept connection: %s", err)
+				logger.Error("Failed to accept connection: %s", err)
 				continue
 			}
 			connId++
