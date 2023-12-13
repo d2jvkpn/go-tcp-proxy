@@ -1,5 +1,5 @@
 run:
-	go run cmd/tcp-proxy/main.go
+	go run cmd/tcp-proxy/main.go -color
 
 build-bin:
 	mkdir -p target
