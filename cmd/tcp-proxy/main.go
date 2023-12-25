@@ -19,10 +19,10 @@ var (
 
 func main() {
 	var (
-		localAddr   string
-		localPorts  []uint64
-		remoteAddr  string
-		remotePorts []uint64
+		listenAddrs string
+		listenPorts []uint64
+		targetAddrs string
+		targetPorts []uint64
 		err         error
 		config      *Config
 		quit        chan os.Signal
@@ -33,15 +33,24 @@ func main() {
 
 	config = NewConfig()
 
-	flag.StringVar(&localAddr, "local", ":8080,8081,8082-8089", `local address`)
-	flag.StringVar(&remoteAddr, "remote", "localhost:8000,8001,8002-8009", `remote address`)
+	flag.StringVar(&listenAddrs, "listen", ":9000", `listen addresses, e.g. :9000,9001,9002-9009`)
+
+	flag.StringVar(
+		&targetAddrs, "target",
+		"localhost:8000", `target service addresses, e.g. localhost:8000,8001,8002-8009`,
+	)
 
 	flag.StringVar(&config.Match, "match", "", "match regex (in the form 'regex')")
 	flag.StringVar(&config.Replace, "replace", "", "replace regex (in the form 'regex~replacer')")
 	flag.BoolVar(&config.Color, "color", false, "output ansi color")
 	flag.BoolVar(&config.Nagles, "nagles", false, "disable nagles algorithm")
 	flag.BoolVar(&config.Hex, "hex", false, "output hex")
-	flag.BoolVar(&config.UnwrapTLS, "unwrap-tls", false, "remote connection with TLS exposed unencrypted locally")
+
+	flag.BoolVar(
+		&config.UnwrapTLS, "unwrap-tls",
+		false, "remote connection with TLS exposed unencrypted locally",
+	)
+
 	flag.BoolVar(&config.Verbose, "v", false, "display server actions")
 	flag.BoolVar(&config.Veryverbose, "vv", false, "display server actions and all tcp data")
 
@@ -56,26 +65,26 @@ func main() {
 		Color:   config.Color,
 	}
 
-	if localPorts, err = parseAddr(&localAddr); err != nil {
+	if listenPorts, err = parseAddr(&listenAddrs); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
-	if remotePorts, err = parseAddr(&remoteAddr); err != nil {
+	if targetPorts, err = parseAddr(&targetAddrs); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
-	if len(localPorts) != len(remotePorts) {
-		logger.Error("The number of localPorts and remotePorts is not equal")
+	if len(listenPorts) != len(targetPorts) {
+		logger.Error("The number of listenPorts and targetPorts is not equal")
 		os.Exit(1)
 	}
 
 	//
-	listeners = make([]*net.TCPListener, 0, len(localPorts))
-	for i := range localPorts {
-		laddr := fmt.Sprintf("%s:%d", localAddr, localPorts[i])
-		raddr := fmt.Sprintf("%s:%d", remoteAddr, remotePorts[i])
+	listeners = make([]*net.TCPListener, 0, len(listenPorts))
+	for i := range listenPorts {
+		laddr := fmt.Sprintf("%s:%d", listenAddrs, listenPorts[i])
+		raddr := fmt.Sprintf("%s:%d", targetAddrs, targetPorts[i])
 
 		if listener, err = run(laddr, raddr, config, logger); err != nil {
 			logger.Error(err.Error())
@@ -130,18 +139,18 @@ func parseAddr(str *string) (ports []uint64, err error) {
 	return proxy.ParsePorts(portStr)
 }
 
-func run(localAddr string, remoteAddr string, config *Config, logger proxy.Logger) (
+func run(listenAddrs string, targetAddrs string, config *Config, logger proxy.Logger) (
 	listener *net.TCPListener, err error) {
 	var (
 		connId       uint64
 		laddr, raddr *net.TCPAddr
 	)
 
-	if laddr, err = net.ResolveTCPAddr("tcp", localAddr); err != nil {
+	if laddr, err = net.ResolveTCPAddr("tcp", listenAddrs); err != nil {
 		return nil, fmt.Errorf("Failed to resolve local address: %w", err)
 	}
 
-	if raddr, err = net.ResolveTCPAddr("tcp", remoteAddr); err != nil {
+	if raddr, err = net.ResolveTCPAddr("tcp", targetAddrs); err != nil {
 		return nil, fmt.Errorf("Failed to resolve remote address: %s", err)
 	}
 
@@ -155,8 +164,8 @@ func run(localAddr string, remoteAddr string, config *Config, logger proxy.Logge
 		}
 
 		logger.Info(
-			"go-tcp-proxy (%s) proxing: localAddr=%q, remoteAddr=%q",
-			_Version, localAddr, remoteAddr,
+			"go-tcp-proxy (%s) proxing: listenAddrs=%q, targetAddrs=%q",
+			_Version, listenAddrs, targetAddrs,
 		)
 
 		for {
@@ -180,7 +189,7 @@ func run(localAddr string, remoteAddr string, config *Config, logger proxy.Logge
 
 			if config.UnwrapTLS {
 				logger.Info("Unwrapping TLS")
-				p = proxy.NewTLSUnwrapped(conn, laddr, raddr, remoteAddr)
+				p = proxy.NewTLSUnwrapped(conn, laddr, raddr, targetAddrs)
 			} else {
 				p = proxy.New(conn, laddr, raddr)
 			}

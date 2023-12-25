@@ -25,9 +25,9 @@ $ tcp-proxy --help
 Usage of tcp-proxy:
   -color: output ansi colors
   -hex: output hex
-  -local="localhost:9999": local address
+  -listen="localhost:9999": listen addresses
   -nagles: disable nagles algorithm
-  -remote="localhost:80": remote address
+  -target="localhost:80": target addresses
   -match="": match regex (in the form 'regex')
   -replace="": replace regex (in the form 'regex~replacer')
   -v: display server actions
@@ -43,7 +43,7 @@ Usage of tcp-proxy:
 Since HTTP runs over TCP, we can also use `tcp-proxy` as a primitive HTTP proxy:
 
 ```
-$ tcp-proxy -r echo.jpillora.com:80
+$ tcp-proxy -target echo.jpillora.com:80
 Proxying from localhost:9999 to echo.jpillora.com:80
 ```
 
@@ -61,7 +61,7 @@ $ curl -H 'Host: echo.jpillora.com' localhost:9999/foo
 ### Match Example
 
 ```
-$ tcp-proxy -r echo.jpillora.com:80 -match 'Host: (.+)'
+$ tcp-proxy -target echo.jpillora.com:80 -match 'Host: (.+)'
 Proxying from localhost:9999 to echo.jpillora.com:80
 Matching Host: (.+)
 
@@ -73,7 +73,7 @@ Connection #001 Match #1: Host: echo.jpillora.com
 ### Replace Example
 
 ```
-$ tcp-proxy -r echo.jpillora.com:80 -replace '"ip": "([^"]+)"~"ip": "REDACTED"'
+$ tcp-proxy -target echo.jpillora.com:80 -replace '"ip": "([^"]+)"~"ip": "REDACTED"'
 Proxying from localhost:9999 to echo.jpillora.com:80
 Replacing "ip": "([^"]+)" with "ip": "REDACTED"
 ```
